@@ -56,6 +56,61 @@ const importLazy = require('import-lazy');
 const _ = importLazy(() => require('lodash'))();
 ```
 
+### Usage with TypeScipt
+
+At _TypeScript_, you should use following:
+
+```typescript
+import _importLazy from 'import-lazy';
+
+const importLazy = _importLazy(require);
+const _ = importLazy('lodash');
+```
+
+Or, with types:
+
+```typescript
+import _importLazy from 'import-lazy';
+import type TLodash from 'lodash'; // Important! Note the import as `type`
+
+const importLazy = _importLazy(require);
+const _ = importLazy('lodash') as typeof TLodash;
+```
+
+#### TypeScript with Generics
+
+With an auxiliar function, to reduce the code and have the _Types_ working:
+
+- `src/utils/lazy-import.ts`
+  ```typescript
+  import _importLazy from 'import-lazy';
+
+  const importLazy: any = (
+    importer: typeof require,
+    module: string
+  ) =>  importLazy(importer)(moduleId);
+
+  export default lazyImport as <T extends any>(
+    importer: typeof require,
+    module: string
+  ) => T;
+  ```
+- `src/app/script.ts`. Usage:
+  ```typescript
+  import lazyImport from '../utils/lazy-import';
+
+  import type TLodash from 'lodash'; // Important! Note the import as `type`
+  import type TFoo from './foo'; // Important! Note the import as `type`
+  import type * as TBar from './bar'; // No `default` defined. Important! Note the import as `type`
+  import type * as TTypes from './types'; // This is a type. Important! Note the import as `type`
+
+  const _ = importLazy<typeof TLodash>(require, 'lodash');
+  const foo = importLazy<typeof TFoo>(require, './foo');
+  const bar = importLazy<typeof TBar>(require, './bar');
+  const types = importLazy<TTypes>(require, './types'); // Types not requires `typeof`
+  ```
+
+> Note: The `require` should come from some source where the Import should be done.
 
 ## Related
 
